@@ -6,16 +6,21 @@ import Filters from "@/components/Filters";
 import RecipeGrid from "@/components/RecipeGrid";
 import { fetchRecipes } from "@/lib/api";
 import { getMockRecipes } from "@/lib/mockData";
+import type { Recipe } from "../types/recipe";
 
 export default function Home() {
+  // Explicitly type recipes as Recipe[], always having tags: string[]
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("All");
-  const [recipes, setRecipes] = useState(getMockRecipes());
+  const [recipes, setRecipes] = useState<Recipe[]>(getMockRecipes().map(r => ({
+    ...r,
+    tags: r.tags ?? [],
+  })));
   const [loading, setLoading] = useState(false);
 
   const allTags = useMemo(() => {
     const s = new Set<string>();
-    recipes.forEach((r) => r.tags.forEach((t) => s.add(t)));
+    recipes.forEach((r) => (r.tags ?? []).forEach((t) => s.add(t)));
     return Array.from(s).sort();
   }, [recipes]);
 
@@ -25,7 +30,11 @@ export default function Home() {
     fetchRecipes({ search, tag: category })
       .then((data) => {
         if (!active) return;
-        setRecipes(data);
+        // ensure all recipes have tags: string[]
+        setRecipes(data.map((r: Recipe) => ({
+          ...r,
+          tags: r.tags ?? [],
+        })));
       })
       .finally(() => {
         if (!active) return;
