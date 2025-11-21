@@ -1,13 +1,25 @@
-// Dynamic route - client side cart integration. No PageProps import.
-'use client';
 import { recipes } from "../../../lib/mockData";
 import Image from "next/image";
 import { useCart, CartQuality } from "../../../context/CartContext";
 import React from "react";
+import type { Recipe } from "../../types/recipe";
 
-// Correct prop signature, no PageProps anywhere.
+/**
+ * Dynamic route page for RecipeDetail.
+ * @param params - dynamic route params from Next.js
+ */
 export default function RecipeDetailPage({ params }: { params: { id: string } }) {
   const recipe = recipes.find((r) => r.id === parseInt(params.id, 10));
+  return (
+    <RecipeDetail recipe={recipe} />
+  );
+}
+
+// PUBLIC_INTERFACE
+// Use 'use client' only inside RecipeDetail, so React hooks work and page-level doesn't break typing
+// This prevents type errors for the page handler in Next.js.
+'use client';
+function RecipeDetail({ recipe }: { recipe?: Recipe }) {
   const { cart, addItem, updateItem } = useCart();
   const inCart = recipe && cart.find((ci) => ci.id === recipe.id);
   const qualities: CartQuality[] = ["Fresh", "Good", "Premium"];

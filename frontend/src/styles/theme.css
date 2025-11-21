@@ -13,6 +13,21 @@
   --shadow-lg: 0 16px 40px rgba(2,6,23,0.10);
 }
 
+/* Midnight Minimal Theme - Activated by adding 'midnight-minimal' class to <html> */
+html.midnight-minimal {
+  --ocean-primary: #2c2c34;
+  --ocean-secondary: #6a7fa9;
+  --ocean-success: #2d8dd6;
+  --ocean-error: #ff5c57;
+  --ocean-text: #ececec;
+  --ocean-bg: #181827;
+  --ocean-surface: #232337;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.16);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.22);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.28);
+}
+
+/* Ocean card/surface styles */
 .ocean-surface {
   background: var(--ocean-surface);
   border-radius: var(--radius-lg);

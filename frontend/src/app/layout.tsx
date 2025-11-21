@@ -1,27 +1,31 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import CartProviderClient from "../context/CartProviderClient";
+import './globals.css'
+import '../styles/theme.css'
+import { Metadata } from 'next'
+import Header from '../components/Header'
 
-const inter = Inter({ subsets: ["latin"] });
-
+// PUBLIC_INTERFACE
 export const metadata: Metadata = {
-  title: "Ocean Recipes",
-  description: "A modern recipe browser",
-};
+  title: 'Recipe Browser',
+  description: 'Browse and view delicious recipes',
+}
 
+/**
+ * Root layout for the Recipe Browser app.
+ * Applies global styles and theme, renders Header and child pages.
+ * @param {React.ReactNode} children - Main page content
+ * @returns {JSX.Element} - Application shell
+ */
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className + " bg-gray-50"}>
-        <CartProviderClient>
-          {children}
-        </CartProviderClient>
+    <html lang="en" className="midnight-minimal">
+      <body>
+        <Header />
+        <main>{children}</main>
       </body>
     </html>
-  );
+  )
 }
