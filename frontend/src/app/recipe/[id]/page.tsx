@@ -1,20 +1,22 @@
 import { recipes } from "../../../lib/mockData";
 import Image from "next/image";
 import { useCart, CartQuality } from "../../../context/CartContext";
-import React, { type ReactElement } from "react";
+import React from "react";
 import type { Recipe } from "../../../types/recipe";
 
 /**
  * Dynamic route page for RecipeDetail.
  * @param params - dynamic route params from Next.js { params: { id: string } }
  */
-const RecipeDetailPage = async ({ params }: { params: Promise<{ id: string }> }): Promise<ReactElement> => {
-  const { id } = await params;
+interface RecipeParams {
+  params: { id: string }
+}
+
+export default function Page({ params }: RecipeParams) {
+  const { id } = params;
   const recipe = recipes.find((r) => r.id === parseInt(id, 10));
   return <RecipeDetail recipe={recipe} />;
-};
-
-export default RecipeDetailPage;
+}
 
 /**
  * Needed for Next.js static export with dynamic routes:
