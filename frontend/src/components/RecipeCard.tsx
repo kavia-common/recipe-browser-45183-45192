@@ -1,69 +1,80 @@
-"use client";
-
-import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import type { Recipe } from "@/types/recipe";
-import { cn } from "@/lib/cn";
+import Link from "next/link";
+import { Recipe } from "../types/recipe";
+import { useCart, CartQuality } from "../context/CartContext";
+import React from "react";
 
-interface Props {
+interface RecipeCardProps {
   recipe: Recipe;
 }
 
-// PUBLIC_INTERFACE
-export default function RecipeCard({ recipe }: Props) {
-  /** Card displaying recipe preview with favorite toggle. */
-  const [favorite, setFavorite] = useState<boolean>(Boolean(recipe.favorite));
+const qualities: CartQuality[] = ["Fresh", "Good", "Premium"];
+
+export default function RecipeCard({ recipe }: RecipeCardProps) {
+  const { cart, addItem, updateItem } = useCart();
+  const inCart = cart.find((ci) => ci.id === recipe.id);
 
   return (
-    <article className={cn("ocean-card overflow-hidden h-full flex flex-col")} aria-labelledby={`recipe-${recipe.id}-title`}>
-      <Link href={`/recipe/${recipe.id}`} className="block focus-ring">
-        <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-          <Image
-            src={recipe.image}
-            alt={`${recipe.title} image`}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover transition-transform duration-300 hover:scale-105"
-            priority={false}
-          />
+    <div className="bg-white rounded-xl shadow p-4 flex flex-col overflow-hidden hover:shadow-lg transition">
+      <Link href={`/recipe/${recipe.id}`}>
+        <div className="relative h-40 w-full mb-3 rounded-lg overflow-hidden">
+          <Image src={recipe.image} alt={recipe.title} layout="fill" objectFit="cover" className="rounded-t-lg" />
         </div>
+        <h3 className="font-semibold text-lg text-gray-900">{recipe.title}</h3>
+        <div className="text-gray-500 text-sm mb-2">{recipe.tags?.join(", ")}</div>
       </Link>
-      <div className="p-4 flex flex-col gap-3 flex-1">
-        <header className="flex items-start justify-between gap-2">
-          <h3 id={`recipe-${recipe.id}-title`} className="text-base font-semibold text-[var(--ocean-text)] leading-tight">
-            <Link href={`/recipe/${recipe.id}`} className="hover:underline focus-ring">
-              {recipe.title}
-            </Link>
-          </h3>
+      <p className="flex-1 text-gray-700 mb-4">{recipe.description}</p>
+      
+      <div className="mt-2 flex flex-col items-stretch">
+        <span className="text-blue-700 font-bold mb-2">${(recipe.price ?? 0).toFixed(2)}</span>
+        {!inCart ? (
           <button
-            aria-pressed={favorite}
-            aria-label={favorite ? "Remove from favorites" : "Add to favorites"}
-            onClick={() => setFavorite((v) => !v)}
-            className={cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-ring",
-              favorite ? "bg-[var(--ocean-secondary)] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-            )}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-1 font-medium shadow transition"
+            onClick={() =>
+              addItem({ id: recipe.id, title: recipe.title, price: recipe.price ?? 0 })
+            }
           >
-            {favorite ? "★" : "☆"}
+            Add to Cart
           </button>
-        </header>
-        <p className="text-sm text-gray-600 line-clamp-3">{recipe.description}</p>
-        <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
-          <span>⏱ {recipe.cookingTime}m</span>
-          <span>👤 {recipe.servings} servings</span>
-        </div>
-        <div className="flex flex-wrap gap-1 mt-2" aria-label="Tags">
-          {recipe.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-0.5 rounded-full bg-[rgba(37,99,235,0.1)] text-[var(--ocean-primary)] text-xs"
-            >
-              {tag}
+        ) : (
+          <div className="flex flex-col items-stretch">
+            <div className="flex items-center gap-2 justify-between">
+              <button
+                onClick={() => updateItem(recipe.id, { quantity: inCart.quantity - 1 })}
+                disabled={inCart.quantity <= 1}
+                className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold px-2 rounded transition disabled:opacity-60"
+                aria-label="Decrease quantity"
+              >
+                -
+              </button>
+              <span className="px-2">{inCart.quantity}</span>
+              <button
+                onClick={() => updateItem(recipe.id, { quantity: inCart.quantity + 1 })}
+                className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold px-2 rounded transition"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+              <select
+                value={inCart.quality}
+                onChange={e =>
+                  updateItem(recipe.id, { quality: e.target.value as CartQuality })
+                }
+                className="ml-2 border rounded px-2 py-1 text-sm"
+              >
+                {qualities.map((q) => (
+                  <option value={q} key={q}>
+                    {q}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <span className="text-xs text-blue-600 mt-1 self-end">
+              Subtotal: ${(inCart.quantity * inCart.price).toFixed(2)}
             </span>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
-    </article>
+    </div>
   );
 }

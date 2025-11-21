@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import "@/styles/theme.css";
-import Header from "@/components/Header";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import CartProviderClient from "../context/CartProviderClient";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Recipe Browser",
-  description: "Browse and view delicious recipes with a modern Ocean Professional theme.",
+  title: "Ocean Recipes",
+  description: "A modern recipe browser",
 };
 
 export default function RootLayout({
@@ -14,13 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className="min-h-screen bg-[var(--ocean-bg)] text-[var(--ocean-text)] antialiased">
-        <div className="relative">
-          <div className="absolute inset-0 -z-10 ocean-gradient" aria-hidden="true" />
-          <Header />
-          <main className="container mx-auto px-4 py-6">{children}</main>
-        </div>
+    <html lang="en">
+      <body className={inter.className + " bg-gray-50"}>
+        <CartProviderClient>
+          {children}
+        </CartProviderClient>
       </body>
     </html>
   );
