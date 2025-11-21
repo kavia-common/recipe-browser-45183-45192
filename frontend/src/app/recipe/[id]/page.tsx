@@ -14,29 +14,36 @@ export function generateStaticParams(): Array<{ id: string }> {
 }
 
 // PUBLIC_INTERFACE
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
-}): Metadata {
-  /** Generates per-recipe metadata for better SEO and to satisfy typing. */
-  const r = getMockRecipeById(params.id);
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  /**
+   * Generates per-recipe metadata for better SEO, compatible with Next.js 15 PageProps
+   * where params can be a Promise-like object during static generation.
+   */
+  const awaited = await params;
+  const r = getMockRecipeById(awaited.id);
   return {
     title: r ? `${r.title} – Ocean Recipes` : "Recipe – Ocean Recipes",
     description: r?.description ?? "Recipe details",
   };
 }
 
-export default function RecipeDetailPage({
+// PUBLIC_INTERFACE
+export default async function RecipeDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   /**
    * Recipe detail page shows title, image, ingredients, steps, cooking time, servings, and tags.
    * For static export we use mock data during build. At runtime, pages are pre-generated.
+   * Adjusted to support Promise-like params as per Next.js 15 typing.
    */
-  const recipe: Recipe | null = getMockRecipeById(params.id) ?? null;
+  const awaited = await params;
+  const recipe: Recipe | null = getMockRecipeById(awaited.id) ?? null;
 
   if (!recipe) {
     return (
