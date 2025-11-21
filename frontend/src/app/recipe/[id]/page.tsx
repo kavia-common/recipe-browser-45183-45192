@@ -1,26 +1,37 @@
-'use client';
-
 import { recipes } from "../../../lib/mockData";
 import Image from "next/image";
 import { useCart, CartQuality } from "../../../context/CartContext";
-import React from "react";
+import React, { type ReactElement } from "react";
 import type { Recipe } from "../../../types/recipe";
 
 /**
  * Dynamic route page for RecipeDetail.
- * @param params - dynamic route params from Next.js
+ * @param params - dynamic route params from Next.js { params: { id: string } }
  */
-export default function RecipeDetailPage({ params }) {
-  const recipe = recipes.find((r) => r.id === parseInt(params.id, 10));
-  return (
-    <RecipeDetail recipe={recipe} />
-  );
+const RecipeDetailPage = async ({ params }: { params: Promise<{ id: string }> }): Promise<ReactElement> => {
+  const { id } = await params;
+  const recipe = recipes.find((r) => r.id === parseInt(id, 10));
+  return <RecipeDetail recipe={recipe} />;
+};
+
+export default RecipeDetailPage;
+
+/**
+ * Needed for Next.js static export with dynamic routes:
+ * This generates all possible IDs for recipes to be statically pre-rendered.
+ */
+export async function generateStaticParams() {
+  // Import recipes directly or statically, depending on build.
+  // recipes (array) is imported above.
+  return recipes.map(recipe => ({
+    id: recipe.id.toString(),
+  }));
 }
 
 // PUBLIC_INTERFACE
-// Use 'use client' only inside RecipeDetail, so React hooks work and page-level doesn't break typing
-// This prevents type errors for the page handler in Next.js.
+// Move 'use client' inside RecipeDetail, fix card styling for Midnight Minimal/dark/theme compatibility.
 function RecipeDetail({ recipe }: { recipe?: Recipe }) {
+  'use client';
   const { cart, addItem, updateItem } = useCart();
   const inCart = recipe && cart.find((ci) => ci.id === recipe.id);
   const qualities: CartQuality[] = ["Fresh", "Good", "Premium"];
@@ -28,19 +39,19 @@ function RecipeDetail({ recipe }: { recipe?: Recipe }) {
   if (!recipe) return <div className="p-8">Recipe not found.</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-8 bg-white rounded shadow mt-10">
+    <div className="max-w-3xl mx-auto p-8 ocean-surface mt-10">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="relative w-full md:w-1/2 h-72 rounded-lg overflow-hidden">
           <Image src={recipe.image} alt={recipe.title} layout="fill" objectFit="cover" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h2 className="text-3xl font-bold text-blue-700 mb-3">{recipe.title}</h2>
-          <span className="text-amber-500 font-medium text-lg mb-3">{recipe.tags?.join(", ")}</span>
-          <p className="text-gray-700 mb-4">{recipe.description}</p>
-          <span className="font-semibold text-blue-700 text-lg mb-4">${(recipe.price ?? 0).toFixed(2)}</span>
+          <h2 className="text-3xl font-bold mb-3" style={{ color: "var(--ocean-primary)" }}>{recipe.title}</h2>
+          <span className="font-medium text-lg mb-3" style={{ color: "var(--ocean-secondary)" }}>{recipe.tags?.join(", ")}</span>
+          <p className="mb-4" style={{ color: "var(--ocean-text)" }}>{recipe.description}</p>
+          <span className="font-semibold text-lg mb-4" style={{ color: "var(--ocean-primary)" }}>${(recipe.price ?? 0).toFixed(2)}</span>
           {!inCart ? (
             <button
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 font-medium shadow transition mt-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded px-4 py-2 font-medium focus-ring transition mt-2"
               onClick={() =>
                 addItem({ id: recipe.id, title: recipe.title, price: recipe.price ?? 0 })
               }
